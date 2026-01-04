@@ -1,6 +1,9 @@
 import { useEffect, useRef, useState } from "react";
 import L from "leaflet";
 import "leaflet/dist/leaflet.css";
+import SearchBox from "../Search/SearchBox";
+import { geocodeAddress } from "../../services/geocoding";
+
 
 const MapView = () => {
   const mapRef = useRef(null);
@@ -45,11 +48,22 @@ const MapView = () => {
     mapRef.current.flyTo([lat, lng], mapRef.current.getZoom());
   }, [clickedPosition]);
 
+  //handle search
+   const handleSearch = async (query) => {
+    const result = await geocodeAddress(query);
+    if (!result) {
+      alert("Address not found");
+      return;
+    }
+    setClickedPosition({ lat: result.lat, lng: result.lng });
+    console.log("Coordinates:", result.lat, result.lng, "Name:", result.display_name);
+  };
+
   return (
-    <div
-      id="map"
-      style={{ height: "100%", width: "100%" }}
-    />
+    <div style={{ height: "100%", width: "100%" }}>
+      <SearchBox onSearch={handleSearch} />
+      <div id="map" style={{ height: "100%", width: "100%" }} />
+    </div>
   );
 };
 
