@@ -14,18 +14,21 @@ const SearchBox = ({ onSearch }) => {
   };
 
   return (
-    <div className="absolute top-4 left-4 z-50 bg-white p-2 rounded shadow-md flex">
+    <div
+      style={{ position: "fixed", top: 16, left: 64, zIndex: 2000 }}
+      className="bg-white p-2 rounded shadow-md flex text-black"
+    >
       <input
         type="text"
         value={query}
         onChange={(e) => setQuery(e.target.value)}
         onKeyPress={handleKeyPress}
         placeholder="Search address"
-        className="border p-1 rounded w-64"
+        className="border p-1 rounded w-64 bg-white text-black placeholder-gray-500"
       />
       <button
         onClick={handleSearch}
-        className="ml-2 bg-blue-500 text-white px-3 rounded hover:bg-blue-600"
+        className="ml-2 bg-blue-500 text-black-50 px-3 rounded hover:bg-blue-600"
       >
         Search
       </button>

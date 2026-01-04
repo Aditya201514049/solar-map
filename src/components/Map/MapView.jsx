@@ -60,7 +60,7 @@ const MapView = () => {
   };
 
   return (
-    <div style={{ height: "100%", width: "100%" }}>
+    <div style={{ position: "relative", height: "100%", width: "100%" }}>
       <SearchBox onSearch={handleSearch} />
       <div id="map" style={{ height: "100%", width: "100%" }} />
     </div>
