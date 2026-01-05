@@ -28,7 +28,7 @@ const SearchBox = ({ onSearch }) => {
       />
       <button
         onClick={handleSearch}
-        className="ml-2 bg-blue-500 text-white px-3 rounded hover:bg-blue-600"
+        className="ml-2 bg-blue-500 text-black-200 px-3 rounded hover:bg-blue-600"
       >
         Search
       </button>
