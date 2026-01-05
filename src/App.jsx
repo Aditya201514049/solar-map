@@ -10,6 +10,8 @@ function App() {
   const [isLoadingBuildings, setIsLoadingBuildings] = useState(false);
   const [buildingsError, setBuildingsError] = useState(null);
   const [buildingsCount, setBuildingsCount] = useState(0);
+  const [radius, setRadius] = useState(300);
+  const [selectedBuildingIndex, setSelectedBuildingIndex] = useState(null);
 
   useEffect(() => {
     if (!clickedPosition) return;
@@ -17,8 +19,9 @@ function App() {
     let cancelled = false;
     setIsLoadingBuildings(true);
     setBuildingsError(null);
+    setSelectedBuildingIndex(null);
 
-    fetchNearbyBuildings(clickedPosition.lat, clickedPosition.lng)
+    fetchNearbyBuildings(clickedPosition.lat, clickedPosition.lng, radius)
       .then((data) => {
         if (cancelled) return;
         const parsed = parseBuildings(data);
@@ -30,6 +33,7 @@ function App() {
         if (cancelled) return;
         setPolygons([]);
         setBuildingsCount(0);
+        setSelectedBuildingIndex(null);
         setBuildingsError(err?.message || "Failed to load buildings");
       })
       .finally(() => {
@@ -40,7 +44,7 @@ function App() {
     return () => {
       cancelled = true;
     };
-  }, [clickedPosition]);
+  }, [clickedPosition, radius]);
 
   const handleSearch = async (query) => {
     const result = await geocodeAddress(query);
@@ -60,17 +64,45 @@ function App() {
       >
         {clickedPosition ? (
           <>
-            {isLoadingBuildings ? "Loading buildings…" : `Buildings: ${buildingsCount}`}
+            {isLoadingBuildings
+              ? "Loading buildings…"
+              : `Buildings in ${radius}m: ${buildingsCount}`}
             {buildingsError ? ` — Error: ${buildingsError}` : null}
+            <div className="mt-2">
+              <div className="flex items-center gap-2">
+                <span className="whitespace-nowrap">Radius</span>
+                <input
+                  type="range"
+                  min="50"
+                  max="800"
+                  step="50"
+                  value={radius}
+                  onChange={(e) => setRadius(Number(e.target.value))}
+                />
+                <span className="whitespace-nowrap">{radius}m</span>
+              </div>
+            </div>
           </>
         ) : (
           "Click on the map or search a place"
         )}
       </div>
+
+      {selectedBuildingIndex !== null && polygons[selectedBuildingIndex] ? (
+        <div
+          style={{ position: "fixed", top: 128, left: 64, zIndex: 2000 }}
+          className="bg-white/90 text-black px-3 py-2 rounded shadow text-sm"
+        >
+          {`Selected building: ${selectedBuildingIndex + 1} / ${polygons.length}`}
+          <div>{`Points: ${polygons[selectedBuildingIndex].length}`}</div>
+        </div>
+      ) : null}
       <MapView
         setClickedPosition={setClickedPosition}
         clickedPosition={clickedPosition}
         polygons={polygons}
+        selectedBuildingIndex={selectedBuildingIndex}
+        onSelectBuilding={setSelectedBuildingIndex}
       />
     </div>
   );

@@ -26,7 +26,13 @@ function RecenterOnPosition({ clickedPosition }) {
   return null;
 }
 
-const MapView = ({ setClickedPosition, clickedPosition, polygons }) => {
+const MapView = ({
+  setClickedPosition,
+  clickedPosition,
+  polygons,
+  selectedBuildingIndex,
+  onSelectBuilding,
+}) => {
   return (
     <MapContainer
       center={[24.7359, 91.6852]} // Sylhet default
@@ -52,9 +58,15 @@ const MapView = ({ setClickedPosition, clickedPosition, polygons }) => {
           key={index}
           positions={polygon}
           pathOptions={{
-            color: "blue",
-            weight: 1,
-            fillOpacity: 0.4,
+            color: index === selectedBuildingIndex ? "red" : "blue",
+            weight: index === selectedBuildingIndex ? 2 : 1,
+            fillOpacity: index === selectedBuildingIndex ? 0.55 : 0.4,
+          }}
+          eventHandlers={{
+            click: (e) => {
+              e?.originalEvent?.stopPropagation?.();
+              onSelectBuilding(index);
+            },
           }}
         />
       ))}
