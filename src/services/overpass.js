@@ -48,5 +48,18 @@ export function parseBuildings(osmData) {
     way.nodes.map((nodeId) => nodes[nodeId]).filter(Boolean)
   );
 
-  return polygons;
+  const cleaned = polygons
+    .map((ring) => {
+      if (!Array.isArray(ring) || ring.length === 0) return null;
+
+      const first = ring[0];
+      const last = ring[ring.length - 1];
+      const closed = first && last && first[0] === last[0] && first[1] === last[1];
+      const closedRing = closed ? ring : [...ring, first];
+
+      return closedRing;
+    })
+    .filter((ring) => Array.isArray(ring) && ring.length >= 4);
+
+  return cleaned;
 }

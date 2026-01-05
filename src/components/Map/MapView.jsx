@@ -1,5 +1,5 @@
 import { MapContainer, TileLayer, Marker, Polygon, useMap, useMapEvents } from "react-leaflet";
-import { useEffect, useState } from "react";
+import { useEffect } from "react";
 import "leaflet/dist/leaflet.css";
 
 function MapClickHandler({ setClickedPosition }) {
@@ -26,14 +26,7 @@ function RecenterOnPosition({ clickedPosition }) {
   return null;
 }
 
-const MapView = ({ setClickedPosition, clickedPosition }) => {
-  const [polygons, setPolygons] = useState([]);
-
-  // TEMP: expose setter globally for testing
-  useEffect(() => {
-    window.__setBuildingPolygons = setPolygons;
-  }, []);
-
+const MapView = ({ setClickedPosition, clickedPosition, polygons }) => {
   return (
     <MapContainer
       center={[24.7359, 91.6852]} // Sylhet default
