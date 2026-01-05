@@ -12,6 +12,7 @@ function App() {
   const [buildingsCount, setBuildingsCount] = useState(0);
   const [radius, setRadius] = useState(300);
   const [selectedBuildingIndex, setSelectedBuildingIndex] = useState(null);
+  const [showOnlySelected, setShowOnlySelected] = useState(false);
 
   useEffect(() => {
     if (!clickedPosition) return;
@@ -55,6 +56,15 @@ function App() {
     setClickedPosition({ lat: result.lat, lng: result.lng });
   };
 
+  const handleSelectBuilding = (index) => {
+    setSelectedBuildingIndex(index);
+    if (index === null) {
+      setShowOnlySelected(false);
+    } else {
+      setShowOnlySelected(true);
+    }
+  };
+
   return (
     <div style={{ position: "relative", height: "100vh", width: "100vw" }}>
       <SearchBox onSearch={handleSearch} />
@@ -95,6 +105,14 @@ function App() {
         >
           {`Selected building: ${selectedBuildingIndex + 1} / ${polygons.length}`}
           <div>{`Points: ${polygons[selectedBuildingIndex].length}`}</div>
+          <label className="mt-2 flex items-center gap-2">
+            <input
+              type="checkbox"
+              checked={showOnlySelected}
+              onChange={(e) => setShowOnlySelected(e.target.checked)}
+            />
+            <span>Show only selected</span>
+          </label>
         </div>
       ) : null}
       <MapView
@@ -102,7 +120,8 @@ function App() {
         clickedPosition={clickedPosition}
         polygons={polygons}
         selectedBuildingIndex={selectedBuildingIndex}
-        onSelectBuilding={setSelectedBuildingIndex}
+        onSelectBuilding={handleSelectBuilding}
+        showOnlySelected={showOnlySelected}
       />
     </div>
   );
