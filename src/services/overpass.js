@@ -1,4 +1,8 @@
-const OVERPASS_URL = "https://overpass-api.de/api/interpreter";
+const OVERPASS_URLS = [
+  "https://overpass-api.de/api/interpreter",
+  "https://overpass.kumi.systems/api/interpreter",
+  "https://overpass.openstreetmap.ru/api/interpreter",
+];
 
 /**
  * Fetch nearby buildings from OpenStreetMap (raw data)
@@ -15,16 +19,41 @@ export async function fetchNearbyBuildings(lat, lng, radius = 300) {
     out skel qt;
   `;
 
-  const response = await fetch(OVERPASS_URL, {
-    method: "POST",
-    body: query,
-  });
+  const maxAttempts = 3;
+  const timeoutMs = 20000;
+  let lastError = null;
 
-  if (!response.ok) {
-    throw new Error("Overpass API request failed");
+  for (let attempt = 0; attempt < maxAttempts; attempt++) {
+    const url = OVERPASS_URLS[attempt % OVERPASS_URLS.length];
+    const controller = new AbortController();
+    const t = setTimeout(() => controller.abort(), timeoutMs);
+
+    try {
+      const response = await fetch(url, {
+        method: "POST",
+        body: query,
+        signal: controller.signal,
+        headers: {
+          "Content-Type": "text/plain;charset=UTF-8",
+        },
+      });
+
+      if (!response.ok) {
+        lastError = new Error(`Overpass API request failed (${response.status})`);
+      } else {
+        return response.json();
+      }
+    } catch (err) {
+      lastError = err;
+    } finally {
+      clearTimeout(t);
+    }
+
+    // Backoff before retrying
+    await new Promise((r) => setTimeout(r, 600 * (attempt + 1)));
   }
 
-  return response.json();
+  throw new Error(lastError?.message || "Overpass API request failed");
 }
 
 function areSamePoint(a, b) {

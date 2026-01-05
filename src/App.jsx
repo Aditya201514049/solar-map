@@ -10,9 +10,18 @@ function App() {
   const [isLoadingBuildings, setIsLoadingBuildings] = useState(false);
   const [buildingsError, setBuildingsError] = useState(null);
   const [buildingsCount, setBuildingsCount] = useState(0);
+  const [radiusInput, setRadiusInput] = useState(300);
   const [radius, setRadius] = useState(300);
   const [selectedBuildingIndex, setSelectedBuildingIndex] = useState(null);
   const [showOnlySelected, setShowOnlySelected] = useState(false);
+
+  useEffect(() => {
+    const t = setTimeout(() => {
+      setRadius(radiusInput);
+    }, 400);
+
+    return () => clearTimeout(t);
+  }, [radiusInput]);
 
   useEffect(() => {
     if (!clickedPosition) return;
@@ -20,7 +29,6 @@ function App() {
     let cancelled = false;
     setIsLoadingBuildings(true);
     setBuildingsError(null);
-    setSelectedBuildingIndex(null);
 
     fetchNearbyBuildings(clickedPosition.lat, clickedPosition.lng, radius)
       .then((data) => {
@@ -29,12 +37,17 @@ function App() {
         console.log("PARSED POLYGONS:", parsed);
         setPolygons(parsed);
         setBuildingsCount(parsed.length);
+
+        if (
+          selectedBuildingIndex !== null &&
+          (selectedBuildingIndex < 0 || selectedBuildingIndex >= parsed.length)
+        ) {
+          setSelectedBuildingIndex(null);
+          setShowOnlySelected(false);
+        }
       })
       .catch((err) => {
         if (cancelled) return;
-        setPolygons([]);
-        setBuildingsCount(0);
-        setSelectedBuildingIndex(null);
         setBuildingsError(err?.message || "Failed to load buildings");
       })
       .finally(() => {
@@ -45,7 +58,7 @@ function App() {
     return () => {
       cancelled = true;
     };
-  }, [clickedPosition, radius]);
+  }, [clickedPosition, radius, selectedBuildingIndex]);
 
   const handleSearch = async (query) => {
     const result = await geocodeAddress(query);
@@ -86,10 +99,10 @@ function App() {
                   min="50"
                   max="800"
                   step="50"
-                  value={radius}
-                  onChange={(e) => setRadius(Number(e.target.value))}
+                  value={radiusInput}
+                  onChange={(e) => setRadiusInput(Number(e.target.value))}
                 />
-                <span className="whitespace-nowrap">{radius}m</span>
+                <span className="whitespace-nowrap">{radiusInput}m</span>
               </div>
             </div>
           </>
@@ -113,6 +126,13 @@ function App() {
             />
             <span>Show only selected</span>
           </label>
+          <button
+            type="button"
+            className="mt-2 bg-gray-200 px-2 py-1 rounded"
+            onClick={() => handleSelectBuilding(null)}
+          >
+            Clear selection
+          </button>
         </div>
       ) : null}
       <MapView

@@ -6,6 +6,10 @@ import "leaflet/dist/leaflet.css";
 function MapClickHandler({ setClickedPosition }) {
   useMapEvents({
     click(e) {
+      const target = e?.originalEvent?.target;
+      if (target?.closest?.(".leaflet-interactive")) {
+        return;
+      }
       const { lat, lng } = e.latlng;
       console.log("Clicked:", lat, lng);
       setClickedPosition({ lat, lng });
@@ -27,15 +31,6 @@ function FitBoundsOnSelection({ selectedPolygon, enabled }) {
     }
   }, [enabled, map, selectedPolygon]);
 
-  return null;
-}
-
-function MapDeselectHandler({ onDeselect }) {
-  useMapEvents({
-    click() {
-      onDeselect();
-    },
-  });
   return null;
 }
 
@@ -82,8 +77,6 @@ const MapView = ({
 
       <MapClickHandler setClickedPosition={setClickedPosition} />
 
-      <MapDeselectHandler onDeselect={() => onSelectBuilding(null)} />
-
       <RecenterOnPosition clickedPosition={clickedPosition} />
 
       <FitBoundsOnSelection
@@ -120,7 +113,8 @@ const MapView = ({
           }}
           eventHandlers={{
             click: (e) => {
-              e?.originalEvent?.stopPropagation?.();
+              L.DomEvent.stopPropagation(e);
+              L.DomEvent.preventDefault(e);
               if (showOnlySelected) {
                 // keep current selection when only-one is displayed
                 return;
