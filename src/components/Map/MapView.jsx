@@ -1,4 +1,12 @@
-import { MapContainer, TileLayer, Marker, Polygon, useMap, useMapEvents } from "react-leaflet";
+import {
+  LayersControl,
+  MapContainer,
+  Marker,
+  Polygon,
+  TileLayer,
+  useMap,
+  useMapEvents,
+} from "react-leaflet";
 import { useEffect } from "react";
 import L from "leaflet";
 import "leaflet/dist/leaflet.css";
@@ -70,10 +78,23 @@ const MapView = ({
       zoom={14}
       style={{ height: "100%", width: "100%" }}
     >
-      <TileLayer
-        attribution="© OpenStreetMap contributors"
-        url="https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png"
-      />
+      <LayersControl position="topright">
+        <LayersControl.BaseLayer checked name="Streets (OSM)">
+          <TileLayer
+            attribution="© OpenStreetMap contributors"
+            url="https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png"
+          />
+        </LayersControl.BaseLayer>
+
+        <LayersControl.BaseLayer name="Satellite (MapTiler)">
+          <TileLayer
+            attribution='&copy; <a href="https://www.maptiler.com/copyright/" target="_blank" rel="noreferrer">MapTiler</a> &copy; <a href="https://www.openstreetmap.org/copyright" target="_blank" rel="noreferrer">OpenStreetMap contributors</a>'
+            url={`https://api.maptiler.com/maps/satellite/{z}/{x}/{y}.jpg?key=${import.meta.env.VITE_MAPTILER_KEY}`}
+            tileSize={512}
+            zoomOffset={-1}
+          />
+        </LayersControl.BaseLayer>
+      </LayersControl>
 
       <MapClickHandler setClickedPosition={setClickedPosition} />
 
