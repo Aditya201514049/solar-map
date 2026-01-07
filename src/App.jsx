@@ -16,6 +16,16 @@ function App() {
   const [showOnlySelected, setShowOnlySelected] = useState(false);
   const [showBuildings, setShowBuildings] = useState(true);
 
+  const handleClear = () => {
+    setClickedPosition(null);
+    setPolygons([]);
+    setBuildingsCount(0);
+    setBuildingsError(null);
+    setIsLoadingBuildings(false);
+    setSelectedBuildingIndex(null);
+    setShowOnlySelected(false);
+  };
+
   useEffect(() => {
     const t = setTimeout(() => {
       setRadius(radiusInput);
@@ -135,6 +145,14 @@ function App() {
               />
               <span>Show buildings</span>
             </label>
+
+            <button
+              type="button"
+              className="mt-2 bg-gray-200 px-2 py-1 rounded"
+              onClick={handleClear}
+            >
+              Clear
+            </button>
           </>
         ) : (
           "Click on the map or search a place"
