@@ -62,15 +62,20 @@ const MapView = ({
   selectedBuildingIndex,
   onSelectBuilding,
   showOnlySelected,
+  showBuildings,
 }) => {
-  const displayPolygons = showOnlySelected
-    ? selectedBuildingIndex !== null && polygons[selectedBuildingIndex]
-      ? [polygons[selectedBuildingIndex]]
-      : []
-    : polygons;
+  const displayPolygons = !showBuildings
+    ? []
+    : showOnlySelected
+      ? selectedBuildingIndex !== null && polygons[selectedBuildingIndex]
+        ? [polygons[selectedBuildingIndex]]
+        : []
+      : polygons;
 
   const selectedPolygon =
-    selectedBuildingIndex !== null ? polygons[selectedBuildingIndex] : null;
+    showBuildings && selectedBuildingIndex !== null
+      ? polygons[selectedBuildingIndex]
+      : null;
 
   return (
     <MapContainer

@@ -14,6 +14,7 @@ function App() {
   const [radius, setRadius] = useState(300);
   const [selectedBuildingIndex, setSelectedBuildingIndex] = useState(null);
   const [showOnlySelected, setShowOnlySelected] = useState(false);
+  const [showBuildings, setShowBuildings] = useState(true);
 
   useEffect(() => {
     const t = setTimeout(() => {
@@ -25,6 +26,14 @@ function App() {
 
   useEffect(() => {
     if (!clickedPosition) return;
+
+    if (!showBuildings) {
+      setIsLoadingBuildings(false);
+      setBuildingsError(null);
+      setPolygons([]);
+      setBuildingsCount(0);
+      return;
+    }
 
     let cancelled = false;
     setIsLoadingBuildings(true);
@@ -60,6 +69,12 @@ function App() {
     };
   }, [clickedPosition, radius, selectedBuildingIndex]);
 
+  useEffect(() => {
+    if (showBuildings) return;
+    setSelectedBuildingIndex(null);
+    setShowOnlySelected(false);
+  }, [showBuildings]);
+
   const handleSearch = async (query) => {
     const result = await geocodeAddress(query);
     if (!result) {
@@ -87,10 +102,16 @@ function App() {
       >
         {clickedPosition ? (
           <>
-            {isLoadingBuildings
-              ? "Loading buildings…"
-              : `Buildings in ${radius}m: ${buildingsCount}`}
-            {buildingsError ? ` — Error: ${buildingsError}` : null}
+            {showBuildings ? (
+              <>
+                {isLoadingBuildings
+                  ? "Loading buildings…"
+                  : `Buildings in ${radius}m: ${buildingsCount}`}
+                {buildingsError ? ` — Error: ${buildingsError}` : null}
+              </>
+            ) : (
+              "Buildings hidden"
+            )}
             <div className="mt-2">
               <div className="flex items-center gap-2">
                 <span className="whitespace-nowrap">Radius</span>
@@ -105,13 +126,24 @@ function App() {
                 <span className="whitespace-nowrap">{radiusInput}m</span>
               </div>
             </div>
+
+            <label className="mt-2 flex items-center gap-2">
+              <input
+                type="checkbox"
+                checked={showBuildings}
+                onChange={(e) => setShowBuildings(e.target.checked)}
+              />
+              <span>Show buildings</span>
+            </label>
           </>
         ) : (
           "Click on the map or search a place"
         )}
       </div>
 
-      {selectedBuildingIndex !== null && polygons[selectedBuildingIndex] ? (
+      {showBuildings &&
+      selectedBuildingIndex !== null &&
+      polygons[selectedBuildingIndex] ? (
         <div
           style={{ position: "fixed", top: 128, left: 64, zIndex: 2000 }}
           className="bg-white/90 text-black px-3 py-2 rounded shadow text-sm"
@@ -142,6 +174,7 @@ function App() {
         selectedBuildingIndex={selectedBuildingIndex}
         onSelectBuilding={handleSelectBuilding}
         showOnlySelected={showOnlySelected}
+        showBuildings={showBuildings}
       />
     </div>
   );
